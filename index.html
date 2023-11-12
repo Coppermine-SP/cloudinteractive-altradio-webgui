@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/materialize.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/video.js/7.8.1/video-js.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/equalizer.css">
+    <link rel="icon" href="images/favicon.png">
+    <title>altRadio - WebGUI</title>
+</head>
+
+<body>
+    <div class="navbar-fixed">
+        <nav id="player">
+            <div class="container nav-wrapper">
+                <div>
+                    <div style="display: inline-block;">
+                    <i-amp-video-eq>
+                        <div class="-amp-video-eq-col">
+                          <div class="-amp-video-eq-1-1 play-symbol"></div>
+                          <div class="-amp-video-eq-1-2 play-symbol"></div>
+                        </div>
+                        <div class="-amp-video-eq-col">
+                          <div class="-amp-video-eq-2-1 play-symbol"></div>
+                          <div class="-amp-video-eq-2-2 play-symbol"></div>
+                        </div>
+                        <div class="-amp-video-eq-col">
+                          <div class="-amp-video-eq-3-1 play-symbol"></div>
+                          <div class="-amp-video-eq-3-2 play-symbol"></div>
+                        </div>
+                        <div class="-amp-video-eq-col">
+                          <div class="-amp-video-eq-4-1 play-symbol"></div>
+                          <div class="-amp-video-eq-4-2 play-symbol"></div>
+                        </div>
+                      </i-amp-video-eq>
+                    </div>
+                    <p id="current-playing">재생 중이 아닙니다.</p>
+                </div>
+                <div>
+                    <button id="player-control-btn" type="button" onClick="changePlayerState()">
+                        <i id="player-control-status" class="material-icons"></i>
+                    </button>
+                </div>
+            </div>
+        </nav>
+    </div>
+    <div class="container">
+        <div id="video-container" style="display: none">
+            <video id="video-player" controls class="video-js vjs-default-skin">
+            </video>
+        </div>
+        <h4>방송 목록</h4>
+        <div id="channel-list">
+        </div>
+        <footer>
+            <div class="footer">
+                <p>클라우드인터렉티브는 제공되는 방송 컨텐츠에 대한 아무런 법적 책임이나 권리를 가지지 않습니다.<br>방송사업자의 정책에 따라 귀하의 지역에서 시청이 제한될 수도
+                    있습니다.<br><br>
+                    이 웹사이트는 <a href="https://github.com/Coppermine-SP">cloudinteractive-altradio</a> 오픈소스 프로젝트의 일부입니다.
+                </p>
+            </div>
+        </footer>
+    </div>
+    <template id="channel-item-template">
+        <div class="channel-item" onclick="selectProvider(this)">
+            <img></img>
+            <div class="overlay"></div>
+            <div class="channel-info">
+                <div>
+                    <i class="material-icons"></i>
+                </div>
+                <div>
+                    <p class="channel-name"></p>
+                    <p class="program"></p>
+                </div>
+            </div>
+        </div>
+    </template>
+    <template id="video-player-template">
+        <video id="video-player" controls class="video-js vjs-default-skin">
+        </video>
+    </template>
+    <script src="js/materialize.min.js"></script>
+    <script src="js/rplayer.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/video.js/7.8.1/video.min.js"></script>
+    <script>
+        const apiEndpoint = "https://contentgateway.api.cloudint.corp/get_contents";
+        var contentData;
+        var currentPlayState = false;
+        var currentProvider = "";
+        var currentStreamURL = "";
+        var currentContentImageURL = "";
+        var isVideoStream = false;
+        var audioPlayer = new rPlayer();
+        var videoPlayer;
+        const channelListContainer = document.getElementById("channel-list");
+
+        function fetchData() {
+            fetch(apiEndpoint)
+                .then(response => response.json())
+                .then(data => {
+                    if (contentData == data) return;
+                    contentData = data;
+                    data.forEach(element => {
+                        updateChannelItem(element);
+                    });
+                })
+        }
+
+        function updateChannelItem(channel) {
+            const channelItemTemplate = document.querySelector("#channel-item-template").content;
+            let channelDiv = document.querySelector(`div[data-channel-name="${channel.Name}"]`);
+            if (!channelDiv) {
+                channelDiv = document.importNode(channelItemTemplate, true).firstElementChild;
+                channelDiv.setAttribute('data-channel-name', channel.Name);
+                channelDiv.className = "channel-item";
+                document.getElementById('channel-list').appendChild(channelDiv);
+            }
+            channelDiv.querySelector("img").src = channel.ImageURL;
+            channelDiv.querySelector(".channel-name").innerText = `${channel.Provider} - ${channel.Name}`;
+            channelDiv.querySelector(".program").innerText = channel.Program;
+            channelDiv.querySelector(".material-icons").innerText = channel.Type == "0" ? "radio" : "cast";
+            updatePlayerState()
+        }
+
+        HTMLCollection.prototype.forEach = Array.prototype.forEach;
+        function changePlayerState(){
+            if(currentProvider == "") return;
+            currentPlayState = !currentPlayState;
+            const playerStateBtnIcon = document.querySelector("#player-control-status");
+            const playerStateBtn = document.getElementById("player-control-btn");
+            const playingSymbol = document.getElementsByClassName("play-symbol");
+
+            if(isVideoStream) playerStateBtn.style.visibility = "hidden";
+            else playerStateBtn.style.visibility = "visible";
+
+                playingSymbol.forEach(element => {
+                    element.style = currentPlayState ? "animation-play-state: running" : "animation-play-state: paused";
+                });
+            playerStateBtnIcon.innerText = currentPlayState ? "pause" : "play_arrow";
+            if(currentPlayState){
+                if(!isVideoStream) audioPlayer.playSrc(currentStreamURL);
+                else{
+                    videoPlayer.play();
+                }
+            }
+            else{
+                if(!isVideoStream) audioPlayer.pause();
+                else{
+                    videoPlayer.pause();
+                }
+            }
+        }
+
+        function updatePlayerState(){
+            const currentPlayingLabel = document.getElementById("current-playing");
+            if(currentProvider != ""){
+                contentData.forEach(element =>{
+                    if(element.Name == currentProvider){
+                        currentPlayingLabel.innerText = `${element.Provider} - ${element.Name} (${element.Program})`;
+                    }
+                });
+            }
+        }
+
+        function selectProvider(object){
+            const videoPlayerContainer = document.getElementById("video-container");
+            const videoPlayerTemplate = document.querySelector("#video-player-template").content;
+            if(currentPlayState) changePlayerState();
+            currentProvider = object.dataset.channelName;
+            contentData.forEach(element =>{
+                    if(element.Name == currentProvider){
+                        currentStreamURL = element.StreamURL;
+                        isVideoStream = element.Type;
+                        currentContentImageURL = element.ImageURL;
+                    }
+                });
+
+            if(isVideoStream){
+                if(videoPlayer != null){
+                    videojs(document.getElementById("video-player")).dispose();
+                    videoPlayerContainer.appendChild(document.importNode(videoPlayerTemplate, true).firstElementChild);
+                }
+
+                videoPlayer = videojs("video-player", {
+                    sources : [
+                        {src : currentStreamURL, type : "application/x-mpegURL"}
+                    ],
+                    poster : currentContentImageURL,
+                    controls : true,
+                    autoplay: true
+                });
+                videoPlayerContainer.style.display = "block";
+            }
+            else{
+                videoPlayerContainer.style.display = "none";
+            }
+
+            changePlayerState();
+            updatePlayerState();
+        }
+
+        setInterval(fetchData, 5000);
+        fetchData();
+    </script>
+</body>
+</html>

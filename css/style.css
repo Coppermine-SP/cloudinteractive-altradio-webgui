@@ -1,0 +1,113 @@
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css');
+
+html{
+    font-family: Pretendard Variable, sans-serif;
+}
+
+body{
+    background-color: #1a1a1a;
+    overflow-x: hidden;
+    color: #e6e6e6;
+}
+
+footer{
+    margin-top: 50px;
+    border-top: 1px solid #919191;
+    color: #919191;    
+}
+
+/* player area */
+#player{
+    width: 100vw;
+
+    background-color: #3b3b3b;
+    /* DodgerBlue */
+}
+
+#player p, i{
+    margin: 0;
+    margin-right: 10px;
+    font-size: 18px;
+    display: inline-block;
+}
+
+.nav-wrapper{
+    display: flex;
+    justify-content: space-between;
+}
+
+#player-control-btn{
+    border: none;
+    background: none;
+    color: #e6e6e6;
+}
+
+/* video area */
+#video-player{
+    width: 100%;
+    height: 600px;
+}
+
+/* channel area */
+#channel-list{
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    justify-content: space-between;
+}
+
+.channel-item{
+    position: relative;
+    overflow: hidden;
+    min-width: 300px;
+    max-width: 400px;
+    height: 200px;
+    margin: 10px;
+    border-radius: 10px;
+}
+
+.channel-item>img{
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    transition: all 0.2s ease;
+}
+
+.channel-item:hover img{
+    transform: scale(1.2);
+    filter: blur(5px);
+
+}
+  
+.overlay{
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    background-image: linear-gradient(0deg, rgba(0,0,0,0.9023984593837535) 35%, rgba(255,255,255,0) 100%);
+}
+
+
+.channel-info{
+    position: absolute;
+    bottom: 15px;
+    left: 20px;
+    display: flex;
+}
+
+.channel-info p{
+    margin: 0;
+}
+
+.channel-info i{
+    margin-top: 15px;
+    margin-right: 10px;
+}
+
+.channel-name{
+    font-size: 20px;
+    font-weight: 600;
+}
