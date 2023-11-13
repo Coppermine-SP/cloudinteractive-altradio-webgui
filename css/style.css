@@ -19,9 +19,7 @@ footer{
 /* player area */
 #player{
     width: 100vw;
-
     background-color: #3b3b3b;
-    /* DodgerBlue */
 }
 
 #player p, i{
@@ -43,9 +41,17 @@ footer{
 }
 
 /* video area */
+#video-container{
+    position: relative; /* 자식 요소의 위치를 정의하기 위해 상대적 위치 설정 */
+    width: 100%; /* 가로 폭을 100%로 설정 */
+    padding-top: 56.25%; /* 세로 높이를 가로 폭의 56.25%로 설정 (16:9 비율) */
+}
 #video-player{
+    position: absolute; /* 컨테이너 내에서 절대 위치 설정 */
+    top: 0;
+    left: 0;
     width: 100%;
-    height: 600px;
+    height: 100%;
 }
 
 /* channel area */
