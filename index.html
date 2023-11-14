@@ -17,8 +17,8 @@
     <div class="navbar-fixed">
         <nav id="player">
             <div class="container nav-wrapper">
-                <div>
-                    <div style="display: inline-block;">
+                <div style="width: 90%; display: flex; align-items: center; flex-direction:row;">
+                    <div style="flex-basis: 30px;">
                     <i-amp-video-eq>
                         <div class="-amp-video-eq-col">
                           <div class="-amp-video-eq-1-1 play-symbol"></div>
@@ -40,7 +40,7 @@
                     </div>
                     <p id="current-playing">재생 중이 아닙니다.</p>
                 </div>
-                <div>
+                <div style="width: 10%;">
                     <button id="player-control-btn" type="button" onClick="changePlayerState()">
                         <i id="player-control-status" class="material-icons"></i>
                     </button>

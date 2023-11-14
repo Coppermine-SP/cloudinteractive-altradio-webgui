@@ -50,9 +50,15 @@ footer{
 
 #player p, i{
     margin: 0;
-    margin-right: 10px;
     font-size: 18px;
     display: inline-block;
+}
+
+#current-playing{
+    width: 85%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .nav-wrapper{
