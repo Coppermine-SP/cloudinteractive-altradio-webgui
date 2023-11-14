@@ -50,7 +50,7 @@
     </div>
     <div id="status-bar" style="display: none">
         <div class="container">
-            <i class="material-icons">warning</i>
+            <i class="material-icons" style="margin-right: 10px">warning</i>
             <span>컨텐츠 서버 연결 오류. 인터넷 연결 상태를 확인하십시오.</span>
         </div>
     </div>
@@ -207,7 +207,7 @@
                     title: element.Program,
                     artist: `${element.Provider} - ${element.Name}`,
                     artwork: [
-                        { src: currentContentImageURL, type: 'image/png' },
+                        { src: element.ImageURL },
                     ]
                 });
 
