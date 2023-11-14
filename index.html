@@ -190,7 +190,7 @@
             currentProvider = object.dataset.channelName;
             contentData.forEach(element =>{
                     if(element.Name == currentProvider){
-                        currentStreamURL = element.StreamURL;
+                        currentStreamURL = element.StreamURL.replace("http://", "https://");;
                         isVideoStream = element.Type;
                         currentContentImageURL = element.ImageURL;
                     }
@@ -218,6 +218,11 @@
 
             changePlayerState();
             updatePlayerState();
+            window.scrollTo({
+                top: 0,
+                left: 0,
+                behavior: 'smooth'
+            });
         }
 
         setInterval(fetchData, 5000);
