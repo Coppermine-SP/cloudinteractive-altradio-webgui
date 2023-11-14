@@ -48,10 +48,10 @@
             </div>
         </nav>
     </div>
-    <div id="status-bar">
+    <div id="status-bar" style="display: none">
         <div class="container">
             <i class="material-icons">warning</i>
-            <span>서버에 연결 할 수 없습니다. 인터넷 상태를 확인하십시오.</span>
+            <span>컨텐츠 서버 연결 오류. 인터넷 연결 상태를 확인하십시오.</span>
         </div>
     </div>
     <div class="container">
@@ -98,7 +98,7 @@
     <script src="js/rplayer.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/video.js/7.8.1/video.min.js"></script>
     <script>
-        const apiEndpoint = "https://contentgateway.api.cloudint.corp/get_contents";
+        const apiEndpoint = "ㄴhttps://contentgateway.api.cloudint.corp/get_contents";
         var contentData;
         var currentPlayState = false;
         var currentProvider = "";
@@ -119,12 +119,27 @@
                         const noChannel = document.getElementById("no-channel");
                         noChannel.style.display = "none";
                     }
+                    updateStatusBar(false);
                     data.forEach(element => {
                         updateChannelItem(element);
                     })
                 }).catch(err => {
-                    
+                    updateStatusBar(true);
                 })
+        }
+
+        var isErrorbarShowing = false;
+        function updateStatusBar(state){
+            const statusBar = document.getElementById("status-bar");
+            if(isErrorbarShowing == state) return;
+
+            isErrorbarShowing = state;
+            if(isErrorbarShowing){
+                statusBar.style.display = "block";
+            }
+            else{
+                statusBar.style.display = "none";
+            }
         }
 
         function updateChannelItem(channel) {
@@ -227,6 +242,7 @@
 
         setInterval(fetchData, 5000);
         fetchData();
+
     </script>
 </body>
 </html>

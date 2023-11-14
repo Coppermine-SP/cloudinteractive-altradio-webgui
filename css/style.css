@@ -26,13 +26,15 @@ footer{
     background-color: #e65100;
     color: white;
     font-weight: 500;
-    z-index: 997;
+    z-index: 996;
+    transition: top 0.5s;
 }
 @media only screen and (min-width: 601px){
     #status-bar{
         top: 64px;
     }
 }
+
 #status-bar>div{
     display: flex;
     flex-direction: row;
