@@ -19,24 +19,24 @@
             <div class="container nav-wrapper">
                 <div style="width: 90%; display: flex; align-items: center; flex-direction:row;">
                     <div style="flex-basis: 30px;">
-                    <i-amp-video-eq>
-                        <div class="-amp-video-eq-col">
-                          <div class="-amp-video-eq-1-1 play-symbol"></div>
-                          <div class="-amp-video-eq-1-2 play-symbol"></div>
-                        </div>
-                        <div class="-amp-video-eq-col">
-                          <div class="-amp-video-eq-2-1 play-symbol"></div>
-                          <div class="-amp-video-eq-2-2 play-symbol"></div>
-                        </div>
-                        <div class="-amp-video-eq-col">
-                          <div class="-amp-video-eq-3-1 play-symbol"></div>
-                          <div class="-amp-video-eq-3-2 play-symbol"></div>
-                        </div>
-                        <div class="-amp-video-eq-col">
-                          <div class="-amp-video-eq-4-1 play-symbol"></div>
-                          <div class="-amp-video-eq-4-2 play-symbol"></div>
-                        </div>
-                      </i-amp-video-eq>
+                        <i-amp-video-eq>
+                            <div class="-amp-video-eq-col">
+                                <div class="-amp-video-eq-1-1 play-symbol"></div>
+                                <div class="-amp-video-eq-1-2 play-symbol"></div>
+                            </div>
+                            <div class="-amp-video-eq-col">
+                                <div class="-amp-video-eq-2-1 play-symbol"></div>
+                                <div class="-amp-video-eq-2-2 play-symbol"></div>
+                            </div>
+                            <div class="-amp-video-eq-col">
+                                <div class="-amp-video-eq-3-1 play-symbol"></div>
+                                <div class="-amp-video-eq-3-2 play-symbol"></div>
+                            </div>
+                            <div class="-amp-video-eq-col">
+                                <div class="-amp-video-eq-4-1 play-symbol"></div>
+                                <div class="-amp-video-eq-4-2 play-symbol"></div>
+                            </div>
+                        </i-amp-video-eq>
                     </div>
                     <p id="current-playing">재생 중이 아닙니다.</p>
                 </div>
@@ -102,6 +102,7 @@
         var contentData;
         var currentPlayState = false;
         var currentProvider = "";
+        var currentProgram = "";
         var currentStreamURL = "";
         var currentContentImageURL = "";
         var isVideoStream = false;
@@ -115,7 +116,7 @@
                 .then(data => {
                     if (contentData == data) return;
                     contentData = data;
-                    if(contentData.length > 0){
+                    if (contentData.length > 0) {
                         const noChannel = document.getElementById("no-channel");
                         noChannel.style.display = "none";
                     }
@@ -129,15 +130,15 @@
         }
 
         var isErrorbarShowing = false;
-        function updateStatusBar(state){
+        function updateStatusBar(state) {
             const statusBar = document.getElementById("status-bar");
-            if(isErrorbarShowing == state) return;
+            if (isErrorbarShowing == state) return;
 
             isErrorbarShowing = state;
-            if(isErrorbarShowing){
+            if (isErrorbarShowing) {
                 statusBar.style.display = "block";
             }
-            else{
+            else {
                 statusBar.style.display = "none";
             }
         }
@@ -159,75 +160,103 @@
         }
 
         HTMLCollection.prototype.forEach = Array.prototype.forEach;
-        function changePlayerState(){
-            if(currentProvider == "") return;
+        function changePlayerState() {
+            if (currentProvider == "") return;
             currentPlayState = !currentPlayState;
             const playerStateBtnIcon = document.querySelector("#player-control-status");
             const playerStateBtn = document.getElementById("player-control-btn");
             const playingSymbol = document.getElementsByClassName("play-symbol");
 
-            if(isVideoStream) playerStateBtn.style.visibility = "hidden";
+            if (isVideoStream) playerStateBtn.style.visibility = "hidden";
             else playerStateBtn.style.visibility = "visible";
 
-                playingSymbol.forEach(element => {
-                    element.style = currentPlayState ? "animation-play-state: running" : "animation-play-state: paused";
-                });
+            playingSymbol.forEach(element => {
+                element.style = currentPlayState ? "animation-play-state: running" : "animation-play-state: paused";
+            });
             playerStateBtnIcon.innerText = currentPlayState ? "pause" : "play_arrow";
-            if(currentPlayState){
-                if(!isVideoStream) audioPlayer.playSrc(currentStreamURL);
-                else{
+            if (currentPlayState) {
+                if (!isVideoStream) audioPlayer.playSrc(currentStreamURL);
+                else {
                     videoPlayer.play();
                 }
             }
-            else{
-                if(!isVideoStream) audioPlayer.pause();
-                else{
+            else {
+                if (!isVideoStream) audioPlayer.pause();
+                else {
                     videoPlayer.pause();
                 }
             }
         }
 
-        function updatePlayerState(){
+        function updatePlayerState() {
             const currentPlayingLabel = document.getElementById("current-playing");
-            if(currentProvider != ""){
-                contentData.forEach(element =>{
-                    if(element.Name == currentProvider){
+            if (currentProvider != "") {
+                contentData.forEach(element => {
+                    if (element.Name == currentProvider) {
                         currentPlayingLabel.innerText = `${element.Provider} - ${element.Name} (${element.Program})`;
+                        updateMediaMetadata(element);
                     }
                 });
             }
         }
 
-        function selectProvider(object){
-            const videoPlayerContainer = document.getElementById("video-container");
-            const videoPlayerTemplate = document.querySelector("#video-player-template").content;
-            if(currentPlayState) changePlayerState();
-            currentProvider = object.dataset.channelName;
-            contentData.forEach(element =>{
-                    if(element.Name == currentProvider){
-                        currentStreamURL = element.StreamURL.replace("http://", "https://");;
-                        isVideoStream = element.Type;
-                        currentContentImageURL = element.ImageURL;
-                    }
+        function updateMediaMetadata(element) {
+            if ('mediaSession' in navigator && currentProvider != "") {
+
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: element.Program,
+                    artist: `${element.Provider} - ${element.Name}`,
+                    artwork: [
+                        { src: currentContentImageURL, type: 'image/png' },
+                    ]
                 });
 
-            if(isVideoStream){
-                if(videoPlayer != null){
+                navigator.mediaSession.setActionHandler('play', function () {
+                    changePlayerState();
+                    return false;
+                 });
+                navigator.mediaSession.setActionHandler('pause', function () { 
+                    changePlayerState();
+                    return false;
+                });
+                navigator.mediaSession.setActionHandler('seekbackward', function () { });
+                navigator.mediaSession.setActionHandler('seekforward', function () { });
+                navigator.mediaSession.setActionHandler('previoustrack', function () { });
+                navigator.mediaSession.setActionHandler('nexttrack', function () { });
+
+            }
+        }
+
+        function selectProvider(object) {
+            const videoPlayerContainer = document.getElementById("video-container");
+            const videoPlayerTemplate = document.querySelector("#video-player-template").content;
+            if (currentPlayState) changePlayerState();
+            currentProvider = object.dataset.channelName;
+            contentData.forEach(element => {
+                if (element.Name == currentProvider) {
+                    currentStreamURL = element.StreamURL.replace("http://", "https://");;
+                    isVideoStream = element.Type;
+                    currentContentImageURL = element.ImageURL;
+                }
+            });
+
+            if (isVideoStream) {
+                if (videoPlayer != null) {
                     videojs(document.getElementById("video-player")).dispose();
                     videoPlayerContainer.appendChild(document.importNode(videoPlayerTemplate, true).firstElementChild);
                 }
 
                 videoPlayer = videojs("video-player", {
-                    sources : [
-                        {src : currentStreamURL, type : "application/x-mpegURL"}
+                    sources: [
+                        { src: currentStreamURL, type: "application/x-mpegURL" }
                     ],
-                    poster : currentContentImageURL,
-                    controls : true,
+                    poster: currentContentImageURL,
+                    controls: true,
                     autoplay: true
                 });
                 videoPlayerContainer.style.display = "block";
             }
-            else{
+            else {
                 videoPlayerContainer.style.display = "none";
             }
 
@@ -245,4 +274,5 @@
 
     </script>
 </body>
+
 </html>
