@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/equalizer.css">
     <link rel="icon" href="images/favicon.png">
-    <title>altRadio - WebGUI</title>
+    <title>altRadio - 수신료의 가치 실현</title>
 </head>
 
 <body>
@@ -223,8 +223,8 @@
                 navigator.mediaSession.setActionHandler('seekforward', function () { });
                 navigator.mediaSession.setActionHandler('previoustrack', function () { });
                 navigator.mediaSession.setActionHandler('nexttrack', function () { });
-
             }
+            document.title = `altRadio : ${element.Program}`;
         }
 
         function selectProvider(object) {
