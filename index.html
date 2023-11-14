@@ -48,6 +48,12 @@
             </div>
         </nav>
     </div>
+    <div id="status-bar">
+        <div class="container">
+            <i class="material-icons">warning</i>
+            <span>서버에 연결 할 수 없습니다. 인터넷 상태를 확인하십시오.</span>
+        </div>
+    </div>
     <div class="container">
         <div id="video-container" style="display: none">
             <video id="video-player" controls class="video-js vjs-default-skin">
@@ -55,6 +61,10 @@
         </div>
         <h4>방송 목록</h4>
         <div id="channel-list">
+            <div id="no-channel">
+                <i class="material-icons" style="font-size: 36px">warning</i>
+                <h5>채널이 없습니다.</h5>
+            </div>
         </div>
         <footer>
             <div class="footer">
@@ -105,9 +115,15 @@
                 .then(data => {
                     if (contentData == data) return;
                     contentData = data;
+                    if(contentData.length > 0){
+                        const noChannel = document.getElementById("no-channel");
+                        noChannel.style.display = "none";
+                    }
                     data.forEach(element => {
                         updateChannelItem(element);
-                    });
+                    })
+                }).catch(err => {
+                    
                 })
         }
 
